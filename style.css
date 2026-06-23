@@ -173,31 +173,135 @@ button { cursor: pointer; }
 .normal-step-card {
   min-height: 58px;
   display: grid;
-  grid-template-columns: 38px 1fr;
-  gap: 10px;
-  align-items: center;
+  grid-template-columns: 46px 1fr;
+  gap: 12px;
+  align-items: start;
   padding: 10px 12px;
   border: 1px solid #d8e6ef;
   border-radius: 6px;
   background: #fff;
+  color: var(--ink);
+  text-align: left;
+  transition: border-color .18s, background .18s, transform .18s, box-shadow .18s;
+}
+.normal-step-card:hover {
+  transform: translateY(-1px);
+  border-color: #89bad7;
+  background: #f3f9fd;
+}
+.normal-step-card.selected {
+  border-color: var(--green);
+  background: #eefaf6;
+  box-shadow: 0 6px 18px rgba(22, 133, 107, .12);
 }
 .normal-step-index {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 8px;
   color: #fff;
   background: var(--green);
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 800;
 }
-.normal-step-card p {
+.normal-step-text {
+  display: grid;
+  gap: 4px;
+}
+.normal-step-text strong {
   margin: 0;
   color: #30485e;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.4;
+}
+.normal-step-text small {
+  color: var(--muted);
+  font-size: 12px;
   line-height: 1.5;
+}
+.normal-detail {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid #cddfda;
+  border-radius: 8px;
+  background: #fff;
+}
+.normal-detail-header {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.normal-detail-header > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--green);
+  font-size: 20px;
+  font-weight: 900;
+}
+.normal-detail-header h4 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 18px;
+}
+.normal-detail-header p {
+  margin: 4px 0 0;
+  color: #4b6073;
+  font-size: 13px;
+}
+.people-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #0d5f4e;
+  background: #e7f7f2;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.normal-detail-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.normal-detail-block {
+  padding: 13px 14px;
+  border: 1px solid #e0e8ee;
+  border-radius: 6px;
+  background: #fbfcfd;
+}
+.normal-detail-block.wide {
+  grid-column: 1 / -1;
+}
+.normal-detail-block h5 {
+  margin: 0 0 8px;
+  color: var(--navy);
+  font-size: 13px;
+}
+.normal-detail-block p {
+  margin: 0;
+  color: #40566a;
+  font-size: 13px;
+}
+.normal-detail-block ul {
+  margin: 0;
+  padding-left: 1.2em;
+  color: #40566a;
+  font-size: 13px;
+}
+.normal-detail-block li + li {
+  margin-top: 4px;
+}
+.caution-detail {
+  border-left: 5px solid var(--warning-line);
+  background: var(--warning);
 }
 .empty-note {
   margin: 0;
@@ -271,7 +375,7 @@ footer { padding: 24px; color: #7b8995; text-align: center; font-size: 11px; }
 @media (max-width: 1050px) {
   .app-layout { width: min(960px, calc(100% - 30px)); grid-template-columns: 280px minmax(0, 1fr); gap: 16px; }
   .process-name { font-size: 12px; }
-  .normal-steps-container, .caution-list, .future-card ul { grid-template-columns: 1fr 1fr; }
+  .normal-steps-container, .normal-detail-grid, .caution-list, .future-card ul { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 760px) {
@@ -286,7 +390,9 @@ footer { padding: 24px; color: #7b8995; text-align: center; font-size: 11px; }
   .main-panel { gap: 15px; }
   .selected-process-wrap, .input-card-body, .result-block { padding: 19px; }
   .normal-section { padding: 18px; }
-  .normal-steps-container, .detail-grid, .caution-list, .future-card ul { grid-template-columns: 1fr; }
+  .normal-steps-container, .normal-detail-grid, .detail-grid, .caution-list, .future-card ul { grid-template-columns: 1fr; }
+  .normal-detail-header { grid-template-columns: 38px 1fr; }
+  .people-badge { grid-column: 2; width: fit-content; }
   .text-button { margin-left: 0; }
 }
 

@@ -137,18 +137,77 @@ const sensorNotOnTrouble = {
 // 通常手順。工程ごとに追加していけば、画面側はそのまま拡張できます。
 const normalStepLists = {
   io_check: [
-    "図面、I/O表、PLC割付表を準備する",
-    "PLCとHMIを立ち上げ、モニタできる状態にする",
-    "入力機器から確認を始める",
-    "センサー、リミットスイッチ、押しボタンなどを1点ずつON/OFFする",
-    "実機の状態とPLC入力モニタが一致しているか確認する",
-    "PLC入力とHMI表示が一致しているか確認する",
-    "図面の入力番号、PLC入力番号、HMI表示名が一致しているか確認する",
-    "入力確認が終わったら、出力機器の確認に進む",
-    "出力をONする前に、動作しても危険がない状態か確認する",
-    "ランプ、ブザー、ソレノイド、リレーなどを1点ずつ確認する",
-    "出力ON時に対象機器が正しく動作するか確認する",
-    "確認結果、不一致箇所、修正内容を記録する"
+    {
+      title: "入力信号の確認をする",
+      summary: "実機のセンサー・スイッチを動かし、PLC入力でON/OFFを確認する",
+      overview: "センサー、リミットスイッチ、押しボタンなどの入力信号が、実機からPLC入力まで正しく入っているか確認する。",
+      recommendedPeople: "2人",
+      purpose: "入力機器の配線ミス、入力番号違い、センサー反応不良を早い段階で発見する。",
+      method: [
+        "I/O図面にチェックしながら確認する",
+        "電装屋に配線ミスを確認してもらえるように、確認結果を残す",
+        "該当するシリンダ、センサー、スイッチなどを実際に動かす",
+        "PLC側で該当入力がON/OFFするか確認する"
+      ],
+      roles: [
+        "実機側担当：実際にセンサーやスイッチを動かす、I/O図面にチェックする",
+        "PLC側担当：PLCで入力信号を確認する"
+      ],
+      checkPoints: [
+        "図面の入力番号とPLC入力が一致しているか",
+        "センサーLEDとPLC入力が一致しているか",
+        "タッチパネル表示がある場合は表示も一致しているか",
+        "ON/OFFの反応が逆になっていないか",
+        "反応しない入力がないか"
+      ],
+      records: [
+        "確認済みの入力番号",
+        "反応しなかった入力",
+        "図面と違っていた箇所",
+        "配線修正が必要な箇所"
+      ],
+      cautions: [
+        "タッチパネル表示だけで判断しない",
+        "必ずPLC入力モニタで確認する",
+        "センサーLEDが点灯していても、PLC入力がONしているとは限らない"
+      ]
+    },
+    {
+      title: "出力信号の確認をする",
+      summary: "PLCから出力を強制ONし、対象機器が正しく動作するか確認する",
+      overview: "ランプ、ブザー、ソレノイド、リレーなどの出力機器が、PLC出力から実機まで正しく動作するか確認する。",
+      recommendedPeople: "2人",
+      purpose: "出力配線ミス、出力番号違い、対象機器の誤動作を早い段階で発見する。",
+      method: [
+        "I/O図面にチェックしながら確認する",
+        "電装屋に配線ミスを確認してもらえるように、確認結果を残す",
+        "PLCから対象出力を強制ONする",
+        "該当するランプ、ブザー、ソレノイド、リレーなどが動作するか確認する"
+      ],
+      roles: [
+        "PLC側担当：PLCから出力を強制ON/OFFする",
+        "実機側担当：対象機器が正しく動作するか確認する"
+      ],
+      checkPoints: [
+        "図面の出力番号と実機の動作が一致しているか",
+        "違う機器が動作していないか",
+        "出力ON前に、動作しても危険がない状態か",
+        "ソレノイド動作時にシリンダーが急に動かないか",
+        "ランプ、ブザー、リレーの動作が指示通りか"
+      ],
+      records: [
+        "確認済みの出力番号",
+        "動作しなかった出力",
+        "違う機器が動いた箇所",
+        "配線修正が必要な箇所"
+      ],
+      cautions: [
+        "出力確認は入力確認より危険が高い",
+        "強制ON前に、必ず周囲確認を行う",
+        "ソレノイドやモーター系は特に注意する",
+        "人が装置内にいないことを確認してから出力する"
+      ]
+    }
   ],
   air_manual: [
     "エア供給前に、周囲に人や干渉物がないか確認する",
@@ -190,6 +249,10 @@ const normalStepLists = {
   ]
 };
 
+const normalTitles = {
+  io_check: "I/Oチェック（2人推奨）"
+};
+
 const processDefinitions = [
   ["power_before", "①", "電源投入前確認", false],
   ["first_power", "②", "初回電源投入", false],
@@ -209,17 +272,32 @@ const processDefinitions = [
   ["handover", "⑯", "バックアップ・引き渡し", false]
 ];
 
+function normalizeNormalStep(step, processId, index) {
+  const base = typeof step === "string" ? { title: step } : step;
+  return {
+    id: base.id || `${processId}_normal_${index + 1}`,
+    title: base.title || "",
+    summary: base.summary || "",
+    overview: base.overview || base.summary || "",
+    recommendedPeople: base.recommendedPeople || "",
+    purpose: base.purpose || "",
+    method: base.method || [],
+    roles: base.roles || [],
+    checkPoints: base.checkPoints || [],
+    records: base.records || [],
+    cautions: base.cautions || []
+  };
+}
+
 const debugData = Object.fromEntries(
   processDefinitions.map(([id, number, title, available]) => [id, {
     id,
     number,
     title,
     fullTitle: `${number} ${title}`,
+    normalTitle: normalTitles[id] || `${number} ${title} 通常手順`,
     available,
-    normalSteps: (normalStepLists[id] || []).map((title, index) => ({
-      id: `${id}_normal_${index + 1}`,
-      title
-    })),
+    normalSteps: (normalStepLists[id] || []).map((step, index) => normalizeNormalStep(step, id, index)),
     troubles: available ? { sensor_not_on: sensorNotOnTrouble } : {}
   }])
 );
@@ -236,6 +314,7 @@ const futureFeatures = [
 const appState = {
   selectedProcessId: "",
   selectedTroubleId: "",
+  selectedNormalStepIndex: null,
   reportText: ""
 };
 
@@ -243,8 +322,10 @@ const elements = {
   processList: document.querySelector("#processList"),
   selectedProcess: document.querySelector("#selectedProcess"),
   selectionStatus: document.querySelector("#selectionStatus"),
+  normalTitle: document.querySelector("#normalTitle"),
   normalArea: document.querySelector("#normalArea"),
   normalStepsContainer: document.querySelector("#normalStepsContainer"),
+  normalDetail: document.querySelector("#normalDetail"),
   troubleSelect: document.querySelector("#troubleSelect"),
   equipmentInput: document.querySelector("#equipmentInput"),
   errorInput: document.querySelector("#errorInput"),
@@ -292,19 +373,90 @@ function renderFutureFeatures() {
   elements.futureList.innerHTML = futureFeatures.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("");
 }
 
+function toCircledNumber(index) {
+  return ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"][index] || String(index + 1);
+}
+
+function renderListItems(items) {
+  if (!items.length) return `<li>未登録</li>`;
+  return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
 function renderNormalSteps(process) {
+  elements.normalTitle.textContent = process.normalTitle;
+  elements.normalDetail.hidden = true;
+  elements.normalDetail.innerHTML = "";
+  appState.selectedNormalStepIndex = null;
+
   if (!process.normalSteps.length) {
     elements.normalStepsContainer.innerHTML = `<p class="empty-note">この工程の通常手順は準備中です。</p>`;
   } else {
     elements.normalStepsContainer.innerHTML = process.normalSteps.map((step, index) => `
-      <article class="normal-step-card">
-        <span class="normal-step-index">${index + 1}</span>
-        <p>${escapeHtml(step.title)}</p>
-      </article>
+      <button type="button" class="normal-step-card" data-normal-index="${index}" aria-expanded="false">
+        <span class="normal-step-index">${toCircledNumber(index)}</span>
+        <span class="normal-step-text">
+          <strong>${escapeHtml(step.title)}</strong>
+          <small>${escapeHtml(step.summary)}</small>
+        </span>
+      </button>
     `).join("");
   }
 
   elements.normalArea.hidden = false;
+}
+
+function renderNormalDetail(index) {
+  const process = debugData[appState.selectedProcessId];
+  const step = process?.normalSteps[index];
+  if (!step) return;
+
+  appState.selectedNormalStepIndex = index;
+  document.querySelectorAll(".normal-step-card").forEach((button) => {
+    const isSelected = Number(button.dataset.normalIndex) === index;
+    button.classList.toggle("selected", isSelected);
+    button.setAttribute("aria-expanded", String(isSelected));
+  });
+
+  elements.normalDetail.innerHTML = `
+    <div class="normal-detail-header">
+      <span>${toCircledNumber(index)}</span>
+      <div>
+        <p class="section-kicker">PROCEDURE DETAIL</p>
+        <h4>${escapeHtml(step.title)}</h4>
+        <p>${escapeHtml(step.overview)}</p>
+      </div>
+      ${step.recommendedPeople ? `<strong class="people-badge">推奨人数：${escapeHtml(step.recommendedPeople)}</strong>` : ""}
+    </div>
+
+    <div class="normal-detail-grid">
+      <section class="normal-detail-block wide">
+        <h5>目的</h5>
+        <p>${escapeHtml(step.purpose || "未登録")}</p>
+      </section>
+      <section class="normal-detail-block">
+        <h5>確認方法</h5>
+        <ul>${renderListItems(step.method)}</ul>
+      </section>
+      <section class="normal-detail-block">
+        <h5>役割</h5>
+        <ul>${renderListItems(step.roles)}</ul>
+      </section>
+      <section class="normal-detail-block">
+        <h5>確認ポイント</h5>
+        <ul>${renderListItems(step.checkPoints)}</ul>
+      </section>
+      <section class="normal-detail-block">
+        <h5>記録すること</h5>
+        <ul>${renderListItems(step.records)}</ul>
+      </section>
+      <section class="normal-detail-block caution-detail wide">
+        <h5>注意点</h5>
+        <ul>${renderListItems(step.cautions)}</ul>
+      </section>
+    </div>
+  `;
+  elements.normalDetail.hidden = false;
+  elements.normalDetail.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function selectProcess(processId) {
@@ -434,11 +586,14 @@ function clearInputs() {
 function resetApp() {
   appState.selectedProcessId = "";
   appState.selectedTroubleId = "";
+  appState.selectedNormalStepIndex = null;
   elements.selectedProcess.textContent = "工程を選択してください";
   elements.selectionStatus.textContent = "未選択";
   elements.selectionStatus.classList.add("waiting");
   elements.normalArea.hidden = true;
   elements.normalStepsContainer.innerHTML = "";
+  elements.normalDetail.hidden = true;
+  elements.normalDetail.innerHTML = "";
   elements.troubleSelect.innerHTML = '<option value="">先に工程を選択してください</option>';
   elements.troubleSelect.disabled = true;
   elements.showResultButton.disabled = true;
@@ -480,6 +635,11 @@ async function copyReport() {
 elements.processList.addEventListener("click", (event) => {
   const button = event.target.closest(".process-item.available");
   if (button) selectProcess(button.dataset.processId);
+});
+
+elements.normalStepsContainer.addEventListener("click", (event) => {
+  const button = event.target.closest(".normal-step-card");
+  if (button) renderNormalDetail(Number(button.dataset.normalIndex));
 });
 
 elements.troubleSelect.addEventListener("change", (event) => {
