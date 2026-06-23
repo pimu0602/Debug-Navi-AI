@@ -211,17 +211,94 @@ const normalStepLists = {
     }
   ],
   air_manual: [
-    "エア供給前に、周囲に人や干渉物がないか確認する",
-    "レギュレータ設定値を確認する",
-    "エアをゆっくり投入する",
-    "エア漏れ、異音、急な動作がないか確認する",
-    "手動操作画面または手動操作スイッチを確認する",
-    "シリンダーやアクチュエータを1軸ずつ動作させる",
-    "前進端、後退端などのセンサーが正しく入るか確認する",
-    "動作方向が指示と合っているか確認する",
-    "スピードコントローラで速度を調整する",
-    "干渉、引っかかり、配管の突っ張りがないか確認する",
-    "手動動作確認結果を記録する"
+    {
+      id: "air_supply_check",
+      number: "①",
+      title: "エアー供給を確認する",
+      summary: "エアー供給前の安全確認を行い、レギュレータ設定・エア漏れ・異音・急な動作がないか確認する",
+      recommendedPeople: "2人",
+      overview: "エアー供給前の安全確認を行い、エアー投入後に異常がないか確認する。",
+      purpose: "エアー投入時の急な動作、エア漏れ、異音、圧力設定ミスを早い段階で発見する。",
+      methods: [
+        "エアー供給前に、装置内や可動部周辺に人や干渉物がないか確認する",
+        "レギュレータの設定値を確認する",
+        "エアーをゆっくり投入する",
+        "エアー漏れがないか確認する",
+        "異音がないか確認する",
+        "急な動作がないか確認する"
+      ],
+      roles: [
+        "実機側担当：装置周辺、可動部、配管、レギュレータを確認する",
+        "操作側担当：エアー供給のタイミングを声掛けしながら操作する"
+      ],
+      checkPoints: [
+        "装置内や可動部周辺に人がいないか",
+        "干渉物や工具が残っていないか",
+        "レギュレータ設定値が適正か",
+        "エアー投入時に急な動作がないか",
+        "エアー漏れがないか",
+        "異音がないか"
+      ],
+      records: [
+        "エアー供給確認済み",
+        "レギュレータ設定値",
+        "エアー漏れがあった箇所",
+        "異音があった箇所",
+        "急な動作があった箇所",
+        "修正が必要な箇所"
+      ],
+      cautions: [
+        "エアー投入時は急にシリンダが動く可能性がある",
+        "人が装置内にいないことを確認してからエアーを入れる",
+        "一気にエアーを入れず、状態を見ながらゆっくり投入する",
+        "異常があればすぐにエアーを遮断する"
+      ]
+    },
+    {
+      id: "manual_cylinder_check",
+      number: "②",
+      title: "手動操作でシリンダなどを動かす",
+      summary: "手動操作画面または手動操作スイッチを使い、シリンダやアクチュエータを1軸ずつ動作確認する",
+      recommendedPeople: "2人",
+      overview: "手動操作画面または手動操作スイッチを使い、シリンダやアクチュエータを1軸ずつ動作確認する。",
+      purpose: "手動操作によって、動作方向、端位置センサー、干渉、引っかかり、配管の突っ張りなどを確認する。",
+      methods: [
+        "手動操作画面または手動操作スイッチを確認する",
+        "シリンダやアクチュエータを1軸ずつ動作させる",
+        "前進端、後退端などのセンサーが正しく入るか確認する",
+        "動作方向が指示と合っているか確認する",
+        "干渉、引っかかり、配管の突っ張りがないか確認する",
+        "手動動作確認結果を記録する"
+      ],
+      roles: [
+        "操作側担当：手動操作画面または手動操作スイッチで対象軸を1つずつ動かす",
+        "実機側担当：対象機器の動き、センサー、干渉、配管状態を確認する"
+      ],
+      checkPoints: [
+        "手動操作の対象軸と実際に動く機器が一致しているか",
+        "前進、後退などの動作方向が指示通りか",
+        "前進端、後退端などのセンサーが正しく入るか",
+        "動作中に干渉がないか",
+        "引っかかりがないか",
+        "配管やケーブルが突っ張っていないか",
+        "動作後の停止位置が問題ないか"
+      ],
+      records: [
+        "確認済みの軸、シリンダ、アクチュエータ",
+        "動作しなかった機器",
+        "動作方向が違っていた箇所",
+        "センサーが入らなかった箇所",
+        "干渉や引っかかりがあった箇所",
+        "配管やケーブルに問題があった箇所"
+      ],
+      cautions: [
+        "必ず1軸ずつ動作確認する",
+        "複数の機器を同時に動かさない",
+        "動作前に周囲確認と声掛けを行う",
+        "人が可動部に手を入れていないことを確認してから動かす",
+        "異常があればすぐに停止する"
+      ]
+    }
   ],
   homing: [
     "原点復帰前に、各軸が動作しても安全な位置にあるか確認する",
@@ -251,7 +328,12 @@ const normalStepLists = {
 };
 
 const normalTitles = {
-  io_check: "I/Oチェック（2人推奨）"
+  io_check: "I/Oチェック（2人推奨）",
+  air_manual: "⑤ エア投入・手動動作確認 通常手順"
+};
+
+const normalDescriptions = {
+  air_manual: "エアー供給状態を確認したうえで、手動操作によりシリンダやアクチュエータを1軸ずつ動作確認します。"
 };
 
 const processDefinitions = [
@@ -277,12 +359,13 @@ function normalizeNormalStep(step, processId, index) {
   const base = typeof step === "string" ? { title: step } : step;
   return {
     id: base.id || `${processId}_normal_${index + 1}`,
+    number: base.number || toCircledNumber(index),
     title: base.title || "",
     summary: base.summary || "",
     overview: base.overview || base.summary || "",
     recommendedPeople: base.recommendedPeople || "",
     purpose: base.purpose || "",
-    method: base.method || [],
+    methods: base.methods || base.method || [],
     roles: base.roles || [],
     checkPoints: base.checkPoints || [],
     records: base.records || [],
@@ -297,6 +380,7 @@ const debugData = Object.fromEntries(
     title,
     fullTitle: `${number} ${title}`,
     normalTitle: normalTitles[id] || `${number} ${title} 通常手順`,
+    normalDescription: normalDescriptions[id] || "トラブルが出ていない場合に、上から順番に実施する標準確認手順です。",
     available,
     normalSteps: (normalStepLists[id] || []).map((step, index) => normalizeNormalStep(step, id, index)),
     troubles: available ? { sensor_not_on: sensorNotOnTrouble } : {}
@@ -324,6 +408,7 @@ const elements = {
   selectedProcess: document.querySelector("#selectedProcess"),
   selectionStatus: document.querySelector("#selectionStatus"),
   normalTitle: document.querySelector("#normalTitle"),
+  normalDescription: document.querySelector("#normalDescription"),
   normalArea: document.querySelector("#normalArea"),
   normalStepsContainer: document.querySelector("#normalStepsContainer"),
   normalDetail: document.querySelector("#normalDetail"),
@@ -385,6 +470,7 @@ function renderListItems(items) {
 
 function renderNormalSteps(process) {
   elements.normalTitle.textContent = process.normalTitle;
+  elements.normalDescription.textContent = process.normalDescription;
   elements.normalDetail.hidden = true;
   elements.normalDetail.innerHTML = "";
   appState.selectedNormalStepIndex = null;
@@ -394,7 +480,7 @@ function renderNormalSteps(process) {
   } else {
     elements.normalStepsContainer.innerHTML = process.normalSteps.map((step, index) => `
       <button type="button" class="normal-step-card" data-normal-index="${index}" aria-expanded="false">
-        <span class="normal-step-index">${toCircledNumber(index)}</span>
+        <span class="normal-step-index">${escapeHtml(step.number)}</span>
         <span class="normal-step-text">
           <strong>${escapeHtml(step.title)}</strong>
           <small>${escapeHtml(step.summary)}</small>
@@ -420,7 +506,7 @@ function renderNormalDetail(index) {
 
   elements.normalDetail.innerHTML = `
     <div class="normal-detail-header">
-      <span>${toCircledNumber(index)}</span>
+      <span>${escapeHtml(step.number)}</span>
       <div>
         <p class="section-kicker">PROCEDURE DETAIL</p>
         <h4>${escapeHtml(step.title)}</h4>
@@ -436,7 +522,7 @@ function renderNormalDetail(index) {
       </section>
       <section class="normal-detail-block">
         <h5>確認方法</h5>
-        <ul>${renderListItems(step.method)}</ul>
+        <ul>${renderListItems(step.methods)}</ul>
       </section>
       <section class="normal-detail-block">
         <h5>役割</h5>
