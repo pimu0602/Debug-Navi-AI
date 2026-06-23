@@ -1,6 +1,6 @@
 "use strict";
 
-// 現象データ。将来はAPIレスポンスをこの形に正規化すれば、描画処理を流用できます。
+// トラブル対応データ。将来API連携する場合も、この形へ正規化すれば描画処理を流用できます。
 const sensorNotOnTrouble = {
   id: "sensor_not_on",
   title: "センサーがONしない",
@@ -106,10 +106,21 @@ const sensorNotOnTrouble = {
     }
   ],
   causes: [
-    "センサー位置ズレ", "検出距離不足", "ワーク位置ズレ", "ドグ位置ズレ", "センサー電源未供給",
-    "センサー本体の故障", "コネクタ未接続", "端子台配線ミス", "ケーブル断線", "入力COM違い",
-    "PNP/NPNの考え違い", "PLC入力番号の割付ミス", "ラダー参照デバイス違い",
-    "HMI表示の参照先違い", "安全条件やインターロック未成立"
+    "センサー位置ズレ",
+    "検出距離不足",
+    "ワーク位置ズレ",
+    "ドグ位置ズレ",
+    "センサー電源未供給",
+    "センサー本体の故障",
+    "コネクタ未接続",
+    "端子台配線ミス",
+    "ケーブル断線",
+    "入力COM違い",
+    "PNP/NPNの考え違い",
+    "PLC入力番号の割付ミス",
+    "ラダー参照デバイス違い",
+    "HMI表示の参照先違い",
+    "安全条件やインターロック未成立"
   ],
   cautions: [
     "HMIのランプだけで判断しない",
@@ -123,7 +134,62 @@ const sensorNotOnTrouble = {
   ]
 };
 
-// 16工程のマスターデータ。troublesを追加するだけで現象選択肢を拡張できます。
+// 通常手順。工程ごとに追加していけば、画面側はそのまま拡張できます。
+const normalStepLists = {
+  io_check: [
+    "図面、I/O表、PLC割付表を準備する",
+    "PLCとHMIを立ち上げ、モニタできる状態にする",
+    "入力機器から確認を始める",
+    "センサー、リミットスイッチ、押しボタンなどを1点ずつON/OFFする",
+    "実機の状態とPLC入力モニタが一致しているか確認する",
+    "PLC入力とHMI表示が一致しているか確認する",
+    "図面の入力番号、PLC入力番号、HMI表示名が一致しているか確認する",
+    "入力確認が終わったら、出力機器の確認に進む",
+    "出力をONする前に、動作しても危険がない状態か確認する",
+    "ランプ、ブザー、ソレノイド、リレーなどを1点ずつ確認する",
+    "出力ON時に対象機器が正しく動作するか確認する",
+    "確認結果、不一致箇所、修正内容を記録する"
+  ],
+  air_manual: [
+    "エア供給前に、周囲に人や干渉物がないか確認する",
+    "レギュレータ設定値を確認する",
+    "エアをゆっくり投入する",
+    "エア漏れ、異音、急な動作がないか確認する",
+    "手動操作画面または手動操作スイッチを確認する",
+    "シリンダーやアクチュエータを1軸ずつ動作させる",
+    "前進端、後退端などのセンサーが正しく入るか確認する",
+    "動作方向が指示と合っているか確認する",
+    "スピードコントローラで速度を調整する",
+    "干渉、引っかかり、配管の突っ張りがないか確認する",
+    "手動動作確認結果を記録する"
+  ],
+  homing: [
+    "原点復帰前に、各軸が動作しても安全な位置にあるか確認する",
+    "非常停止、扉、安全回路が正常に復帰しているか確認する",
+    "原点センサー、リミットセンサーの状態を確認する",
+    "原点復帰条件が成立しているか確認する",
+    "1軸ずつ原点復帰を実行する",
+    "原点復帰方向が正しいか確認する",
+    "原点センサー検出後に正しく停止するか確認する",
+    "原点復帰完了フラグがONするか確認する",
+    "HMI上の原点復帰完了表示とPLC状態が一致するか確認する",
+    "原点復帰後の位置ズレや干渉がないか確認する",
+    "原点復帰結果を記録する"
+  ],
+  single_operation: [
+    "単動作前に、対象ユニット周辺の安全を確認する",
+    "手動操作画面で対象動作を選択する",
+    "動作開始条件が成立しているか確認する",
+    "1動作ずつ実行する",
+    "動作方向、動作順、停止位置を確認する",
+    "動作中に干渉や異音がないか確認する",
+    "動作完了センサーが正しくONするか確認する",
+    "次動作へ進む条件が成立するか確認する",
+    "動作後にワーク位置や治具位置が正しいか確認する",
+    "単動作確認結果を記録する"
+  ]
+};
+
 const processDefinitions = [
   ["power_before", "①", "電源投入前確認", false],
   ["first_power", "②", "初回電源投入", false],
@@ -148,7 +214,12 @@ const debugData = Object.fromEntries(
     id,
     number,
     title,
+    fullTitle: `${number} ${title}`,
     available,
+    normalSteps: (normalStepLists[id] || []).map((title, index) => ({
+      id: `${id}_normal_${index + 1}`,
+      title
+    })),
     troubles: available ? { sensor_not_on: sensorNotOnTrouble } : {}
   }])
 );
@@ -162,7 +233,6 @@ const futureFeatures = [
   "工程別トラブルパターン追加"
 ];
 
-// 画面状態はここに集約し、将来の作業ログ保存にもつなげやすくします。
 const appState = {
   selectedProcessId: "",
   selectedTroubleId: "",
@@ -173,6 +243,8 @@ const elements = {
   processList: document.querySelector("#processList"),
   selectedProcess: document.querySelector("#selectedProcess"),
   selectionStatus: document.querySelector("#selectionStatus"),
+  normalArea: document.querySelector("#normalArea"),
+  normalStepsContainer: document.querySelector("#normalStepsContainer"),
   troubleSelect: document.querySelector("#troubleSelect"),
   equipmentInput: document.querySelector("#equipmentInput"),
   errorInput: document.querySelector("#errorInput"),
@@ -220,13 +292,28 @@ function renderFutureFeatures() {
   elements.futureList.innerHTML = futureFeatures.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("");
 }
 
+function renderNormalSteps(process) {
+  if (!process.normalSteps.length) {
+    elements.normalStepsContainer.innerHTML = `<p class="empty-note">この工程の通常手順は準備中です。</p>`;
+  } else {
+    elements.normalStepsContainer.innerHTML = process.normalSteps.map((step, index) => `
+      <article class="normal-step-card">
+        <span class="normal-step-index">${index + 1}</span>
+        <p>${escapeHtml(step.title)}</p>
+      </article>
+    `).join("");
+  }
+
+  elements.normalArea.hidden = false;
+}
+
 function selectProcess(processId) {
   const process = debugData[processId];
   if (!process || !process.available) return;
 
   appState.selectedProcessId = processId;
   appState.selectedTroubleId = "";
-  elements.selectedProcess.textContent = `${process.number} ${process.title}`;
+  elements.selectedProcess.textContent = process.fullTitle;
   elements.selectionStatus.textContent = "選択済み";
   elements.selectionStatus.classList.remove("waiting");
   elements.formMessage.textContent = "";
@@ -237,13 +324,15 @@ function selectProcess(processId) {
     button.setAttribute("aria-pressed", String(isSelected));
   });
 
+  renderNormalSteps(process);
+
   const troubleOptions = Object.values(process.troubles)
     .map((trouble) => `<option value="${trouble.id}">${escapeHtml(trouble.title)}</option>`)
     .join("");
   elements.troubleSelect.innerHTML = `<option value="">現象を選択してください</option>${troubleOptions}`;
   elements.troubleSelect.disabled = false;
   elements.showResultButton.disabled = true;
-  hideResults();
+  hideTroubleResults();
 }
 
 function getCurrentTrouble() {
@@ -251,7 +340,7 @@ function getCurrentTrouble() {
   return process?.troubles[appState.selectedTroubleId] || null;
 }
 
-function renderSteps(steps) {
+function renderTroubleSteps(steps) {
   elements.stepsContainer.innerHTML = steps.map((step, index) => `
     <article class="step-card">
       <div class="step-index">STEP<strong>${index + 1}</strong></div>
@@ -280,7 +369,7 @@ function buildReport(process, trouble) {
   const cautionLines = trouble.cautions.map((caution) => `・${caution}`).join("\n");
 
   return `【工程】
-${process.number} ${process.title}
+${process.fullTitle}
 
 【現象】
 ${trouble.title}
@@ -304,7 +393,7 @@ ${cautionLines}
 現物、配線、PLC入力、ラダー、HMIの順で切り分ける。`;
 }
 
-function showResults() {
+function showTroubleResults() {
   const process = debugData[appState.selectedProcessId];
   const trouble = getCurrentTrouble();
   if (!process || !trouble) {
@@ -312,19 +401,19 @@ function showResults() {
     return;
   }
 
-  renderSteps(trouble.steps);
+  renderTroubleSteps(trouble.steps);
   elements.causesContainer.innerHTML = trouble.causes.map((cause) => `<span class="cause-tag">${escapeHtml(cause)}</span>`).join("");
   elements.cautionsContainer.innerHTML = trouble.cautions.map((caution) => `<li>${escapeHtml(caution)}</li>`).join("");
   appState.reportText = buildReport(process, trouble);
   elements.reportMemo.textContent = appState.reportText;
-  elements.resultSummary.textContent = `${process.number} ${process.title} ／ ${trouble.title}`;
+  elements.resultSummary.textContent = `${process.fullTitle} ・ ${trouble.title}`;
   elements.resultArea.hidden = false;
   elements.copyMessage.textContent = "";
   elements.formMessage.textContent = "";
   elements.resultArea.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function hideResults() {
+function hideTroubleResults() {
   elements.resultArea.hidden = true;
   elements.stepsContainer.innerHTML = "";
   elements.causesContainer.innerHTML = "";
@@ -338,7 +427,7 @@ function clearInputs() {
   elements.equipmentInput.value = "";
   elements.errorInput.value = "";
   elements.formMessage.textContent = "";
-  if (!elements.resultArea.hidden) showResults();
+  if (!elements.resultArea.hidden) showTroubleResults();
   elements.equipmentInput.focus();
 }
 
@@ -348,6 +437,8 @@ function resetApp() {
   elements.selectedProcess.textContent = "工程を選択してください";
   elements.selectionStatus.textContent = "未選択";
   elements.selectionStatus.classList.add("waiting");
+  elements.normalArea.hidden = true;
+  elements.normalStepsContainer.innerHTML = "";
   elements.troubleSelect.innerHTML = '<option value="">先に工程を選択してください</option>';
   elements.troubleSelect.disabled = true;
   elements.showResultButton.disabled = true;
@@ -358,7 +449,7 @@ function resetApp() {
     button.classList.remove("selected");
     button.setAttribute("aria-pressed", "false");
   });
-  hideResults();
+  hideTroubleResults();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -367,7 +458,7 @@ async function copyReport() {
   try {
     await navigator.clipboard.writeText(appState.reportText);
   } catch (error) {
-    // file:// などClipboard APIが使えない環境向けのフォールバック。
+    // file:// などClipboard APIが使えない環境向けのフォールバックです。
     const temp = document.createElement("textarea");
     temp.value = appState.reportText;
     temp.style.position = "fixed";
@@ -395,10 +486,10 @@ elements.troubleSelect.addEventListener("change", (event) => {
   appState.selectedTroubleId = event.target.value;
   elements.showResultButton.disabled = !appState.selectedTroubleId;
   elements.formMessage.textContent = "";
-  hideResults();
+  hideTroubleResults();
 });
 
-elements.showResultButton.addEventListener("click", showResults);
+elements.showResultButton.addEventListener("click", showTroubleResults);
 elements.clearInputButton.addEventListener("click", clearInputs);
 elements.resetButton.addEventListener("click", resetApp);
 elements.copyButton.addEventListener("click", copyReport);

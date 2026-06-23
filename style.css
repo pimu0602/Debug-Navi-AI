@@ -154,6 +154,60 @@ button { cursor: pointer; }
 .form-heading h3, .block-heading h3 { margin: 0; color: var(--navy); font-size: 18px; }
 .form-heading p, .block-heading p { margin: 1px 0 0; color: var(--muted); font-size: 12px; }
 .heading-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--blue); font-weight: 800; }
+.normal-section {
+  margin-bottom: 26px;
+  padding: 22px;
+  border: 1px solid #cfe0eb;
+  border-radius: 8px;
+  background: #f8fbfe;
+}
+.normal-number {
+  background: var(--green);
+}
+.normal-steps-container {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.normal-step-card {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #d8e6ef;
+  border-radius: 6px;
+  background: #fff;
+}
+.normal-step-index {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--green);
+  font-size: 13px;
+  font-weight: 800;
+}
+.normal-step-card p {
+  margin: 0;
+  color: #30485e;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.empty-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.trouble-section-title {
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
 .full-width { grid-column: 1 / -1; }
 .form-field { display: grid; gap: 7px; }
@@ -217,7 +271,7 @@ footer { padding: 24px; color: #7b8995; text-align: center; font-size: 11px; }
 @media (max-width: 1050px) {
   .app-layout { width: min(960px, calc(100% - 30px)); grid-template-columns: 280px minmax(0, 1fr); gap: 16px; }
   .process-name { font-size: 12px; }
-  .caution-list, .future-card ul { grid-template-columns: 1fr 1fr; }
+  .normal-steps-container, .caution-list, .future-card ul { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 760px) {
@@ -231,7 +285,8 @@ footer { padding: 24px; color: #7b8995; text-align: center; font-size: 11px; }
   .process-list { grid-template-columns: 1fr 1fr; }
   .main-panel { gap: 15px; }
   .selected-process-wrap, .input-card-body, .result-block { padding: 19px; }
-  .detail-grid, .caution-list, .future-card ul { grid-template-columns: 1fr; }
+  .normal-section { padding: 18px; }
+  .normal-steps-container, .detail-grid, .caution-list, .future-card ul { grid-template-columns: 1fr; }
   .text-button { margin-left: 0; }
 }
 

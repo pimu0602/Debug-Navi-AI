@@ -14,7 +14,7 @@
       <div>
         <p class="eyebrow">COMMISSIONING SUPPORT</p>
         <h1>Debug Navi AI</h1>
-        <p class="header-description">装置立ち上げ時の確認手順をナビゲートします。<br>工程と現象を選択すると、確認手順・原因候補・注意点・報告用メモを表示します。</p>
+        <p class="header-description">工程を選択すると通常手順を表示します。<br>トラブルが発生した場合は、現象を選択すると原因切り分け用の確認手順・原因候補・注意点・報告用メモを表示します。</p>
       </div>
       <div class="prototype-badge"><span></span>1週間試作版</div>
     </div>
@@ -48,9 +48,23 @@
         </div>
 
         <div class="input-card-body">
-          <div class="form-heading">
+          <section id="normalArea" class="normal-section" hidden aria-live="polite">
+            <div class="block-heading">
+              <span class="block-number normal-number">N</span>
+              <div>
+                <p class="section-kicker">NORMAL PROCEDURE</p>
+                <h3>通常手順</h3>
+                <p>トラブルが出ていない場合に、上から順番に実施する標準確認手順です。</p>
+              </div>
+            </div>
+            <div id="normalStepsContainer" class="normal-steps-container"></div>
+          </section>
+
+          <div class="trouble-section-title">
+            <div class="form-heading">
             <span class="heading-icon" aria-hidden="true">?</span>
-            <div><h3 id="inputTitle">現象・対象情報</h3><p>現場で確認できる情報を入力してください</p></div>
+              <div><p class="section-kicker">TROUBLE NAVI</p><h3 id="inputTitle">トラブル対応ナビ</h3><p>トラブルが発生した場合に、現場で確認できる情報を入力してください。</p></div>
+            </div>
           </div>
 
           <div class="form-grid">
@@ -83,12 +97,12 @@
 
       <section id="resultArea" class="result-area" hidden aria-live="polite">
         <div class="result-header">
-          <div><p class="section-kicker">DEBUG GUIDE</p><h2>確認ナビゲーション</h2></div>
+          <div><p class="section-kicker">TROUBLE NAVI RESULT</p><h2>トラブル対応ナビ結果</h2></div>
           <span id="resultSummary" class="result-summary"></span>
         </div>
 
         <section class="result-block steps-block">
-          <div class="block-heading"><span class="block-number">1</span><div><h3>確認手順</h3><p>上から順番に、信号がどこで止まっているか確認します</p></div></div>
+          <div class="block-heading"><span class="block-number">1</span><div><h3>原因切り分け用の確認手順</h3><p>上から順番に、信号がどこで止まっているか確認します</p></div></div>
           <div id="stepsContainer" class="steps-container"></div>
         </section>
 
