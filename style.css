@@ -265,6 +265,39 @@ button { cursor: pointer; }
   font-size: 12px;
   white-space: nowrap;
 }
+.normal-progress {
+  margin-top: 16px;
+  padding: 13px 14px;
+  border: 1px solid #d7e7ef;
+  border-radius: 7px;
+  background: #f7fbfd;
+}
+.normal-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--navy);
+  font-size: 13px;
+}
+.normal-progress-row span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.normal-progress-track {
+  height: 8px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfeaf0;
+}
+.normal-progress-track span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: var(--green);
+}
 .normal-detail-grid {
   margin-top: 16px;
   display: grid;
@@ -298,6 +331,50 @@ button { cursor: pointer; }
 }
 .normal-detail-block li + li {
   margin-top: 4px;
+}
+.normal-check-list {
+  display: grid;
+  gap: 7px;
+}
+.normal-check-item {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 8px 9px;
+  border: 1px solid #dfe8ee;
+  border-radius: 5px;
+  background: #fff;
+  color: #40566a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.normal-check-item input {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--green);
+}
+.normal-check-item.checked {
+  border-color: #cfe5dc;
+  color: #6b7c78;
+  background: #f0f8f5;
+}
+.normal-check-item.checked span {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: #9bb8ae;
+}
+.memo-detail label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 800;
+}
+.memo-detail textarea {
+  min-height: 96px;
+  background: #fff;
 }
 .caution-detail {
   border-left: 5px solid var(--warning-line);
