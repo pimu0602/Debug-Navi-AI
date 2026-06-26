@@ -173,7 +173,7 @@ button { cursor: pointer; }
 .normal-step-card {
   min-height: 58px;
   display: grid;
-  grid-template-columns: 46px 1fr;
+  grid-template-columns: 46px 1fr auto;
   gap: 12px;
   align-items: start;
   padding: 10px 12px;
@@ -193,6 +193,20 @@ button { cursor: pointer; }
   border-color: var(--green);
   background: #eefaf6;
   box-shadow: 0 6px 18px rgba(22, 133, 107, .12);
+}
+.normal-step-card.completed {
+  border-color: #b7dccf;
+  background: #f6fbf9;
+}
+.completed-badge {
+  align-self: start;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #0d5f4e;
+  background: #dff3ed;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 .normal-step-index {
   width: 36px;
@@ -298,6 +312,30 @@ button { cursor: pointer; }
   border-radius: inherit;
   background: var(--green);
 }
+.normal-complete-check {
+  margin-top: 12px;
+  display: inline-grid;
+  grid-template-columns: 18px auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #d9e4ea;
+  border-radius: 6px;
+  color: #40566a;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.normal-complete-check input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--green);
+}
+.normal-complete-check.checked {
+  border-color: #b7dccf;
+  color: #0d5f4e;
+  background: #f0f8f5;
+}
 .normal-detail-grid {
   margin-top: 16px;
   display: grid;
@@ -329,41 +367,14 @@ button { cursor: pointer; }
   color: #40566a;
   font-size: 13px;
 }
-.normal-detail-block li + li {
-  margin-top: 4px;
-}
-.normal-check-list {
-  display: grid;
-  gap: 7px;
-}
-.normal-check-item {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 8px;
-  align-items: start;
-  padding: 8px 9px;
-  border: 1px solid #dfe8ee;
-  border-radius: 5px;
-  background: #fff;
+.normal-detail-block ol {
+  margin: 0;
+  padding-left: 1.4em;
   color: #40566a;
   font-size: 13px;
-  line-height: 1.5;
 }
-.normal-check-item input {
-  width: 16px;
-  height: 16px;
-  margin-top: 2px;
-  accent-color: var(--green);
-}
-.normal-check-item.checked {
-  border-color: #cfe5dc;
-  color: #6b7c78;
-  background: #f0f8f5;
-}
-.normal-check-item.checked span {
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-  text-decoration-color: #9bb8ae;
+.normal-detail-block li + li {
+  margin-top: 5px;
 }
 .memo-detail label {
   display: block;

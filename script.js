@@ -472,57 +472,36 @@ function renderListItems(items) {
 function getNormalWorkState(step) {
   if (!appState.normalWork[step.id]) {
     appState.normalWork[step.id] = {
-      checked: {},
+      completed: false,
       memo: ""
     };
   }
   return appState.normalWork[step.id];
 }
 
-function getChecklistItems(step) {
-  const methods = step.methods.map((text, index) => ({
-    key: `method-${index}`,
-    text
-  }));
-  const checkPoints = step.checkPoints.map((text, index) => ({
-    key: `checkpoint-${index}`,
-    text
-  }));
-  return [...methods, ...checkPoints];
+function renderOrderedItems(items) {
+  if (!items.length) return `<p class="empty-note">未登録</p>`;
+  return `<ol>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>`;
 }
 
-function getNormalProgress(step) {
-  const workState = getNormalWorkState(step);
-  const items = getChecklistItems(step);
-  const checkedCount = items.filter((item) => workState.checked[item.key]).length;
+function getProcessNormalProgress(process) {
+  const completedCount = process.normalSteps.filter((step) => getNormalWorkState(step).completed).length;
+  const totalCount = process.normalSteps.length;
   return {
-    checkedCount,
-    totalCount: items.length,
-    percent: items.length ? Math.round((checkedCount / items.length) * 100) : 0,
-    uncheckedItems: items.filter((item) => !workState.checked[item.key]).map((item) => item.text)
+    completedCount,
+    totalCount,
+    percent: totalCount ? Math.round((completedCount / totalCount) * 100) : 0,
+    completedSteps: process.normalSteps.filter((step) => getNormalWorkState(step).completed),
+    uncheckedSteps: process.normalSteps.filter((step) => !getNormalWorkState(step).completed)
   };
 }
 
-function renderChecklistItems(items, keyPrefix, workState) {
-  if (!items.length) return `<p class="empty-note">未登録</p>`;
-  return items.map((item, index) => {
-    const key = `${keyPrefix}-${index}`;
-    const isChecked = Boolean(workState.checked[key]);
-    return `
-      <label class="normal-check-item ${isChecked ? "checked" : ""}">
-        <input class="normal-check-input" type="checkbox" data-check-key="${key}" ${isChecked ? "checked" : ""}>
-        <span>${escapeHtml(item)}</span>
-      </label>
-    `;
-  }).join("");
-}
-
-function updateNormalProgressDisplay(step) {
-  const progress = getNormalProgress(step);
+function updateNormalProgressDisplay(process) {
+  const progress = getProcessNormalProgress(process);
   const progressText = elements.normalDetail.querySelector("#normalProgressText");
   const progressPercent = elements.normalDetail.querySelector("#normalProgressPercent");
   const progressBar = elements.normalDetail.querySelector("#normalProgressBar");
-  if (progressText) progressText.textContent = `確認進捗：${progress.checkedCount} / ${progress.totalCount}`;
+  if (progressText) progressText.textContent = `通常手順の進捗：${progress.completedCount} / ${progress.totalCount}`;
   if (progressPercent) progressPercent.textContent = `${progress.percent}%`;
   if (progressBar) progressBar.style.width = `${progress.percent}%`;
 }
@@ -537,15 +516,19 @@ function renderNormalSteps(process) {
   if (!process.normalSteps.length) {
     elements.normalStepsContainer.innerHTML = `<p class="empty-note">この工程の通常手順は準備中です。</p>`;
   } else {
-    elements.normalStepsContainer.innerHTML = process.normalSteps.map((step, index) => `
-      <button type="button" class="normal-step-card" data-normal-index="${index}" aria-expanded="false">
-        <span class="normal-step-index">${escapeHtml(step.number)}</span>
-        <span class="normal-step-text">
-          <strong>${escapeHtml(step.title)}</strong>
-          <small>${escapeHtml(step.summary)}</small>
-        </span>
-      </button>
-    `).join("");
+    elements.normalStepsContainer.innerHTML = process.normalSteps.map((step, index) => {
+      const isCompleted = getNormalWorkState(step).completed;
+      return `
+        <button type="button" class="normal-step-card ${isCompleted ? "completed" : ""}" data-normal-index="${index}" aria-expanded="false">
+          <span class="normal-step-index">${escapeHtml(step.number)}</span>
+          <span class="normal-step-text">
+            <strong>${escapeHtml(step.title)}</strong>
+            <small>${escapeHtml(step.summary)}</small>
+          </span>
+          ${isCompleted ? `<span class="completed-badge">確認済み</span>` : ""}
+        </button>
+      `;
+    }).join("");
   }
 
   elements.normalArea.hidden = false;
@@ -556,7 +539,7 @@ function renderNormalDetail(index) {
   const step = process?.normalSteps[index];
   if (!step) return;
   const workState = getNormalWorkState(step);
-  const progress = getNormalProgress(step);
+  const progress = getProcessNormalProgress(process);
 
   appState.selectedNormalStepIndex = index;
   document.querySelectorAll(".normal-step-card").forEach((button) => {
@@ -578,13 +561,18 @@ function renderNormalDetail(index) {
 
     <div class="normal-progress">
       <div class="normal-progress-row">
-        <strong id="normalProgressText">確認進捗：${progress.checkedCount} / ${progress.totalCount}</strong>
+        <strong id="normalProgressText">通常手順の進捗：${progress.completedCount} / ${progress.totalCount}</strong>
         <span id="normalProgressPercent">${progress.percent}%</span>
       </div>
       <div class="normal-progress-track" aria-hidden="true">
         <span id="normalProgressBar" style="width: ${progress.percent}%"></span>
       </div>
     </div>
+
+    <label class="normal-complete-check ${workState.completed ? "checked" : ""}">
+      <input id="normalCompleteCheck" type="checkbox" ${workState.completed ? "checked" : ""}>
+      <span>この手順を確認済みにする</span>
+    </label>
 
     <div class="normal-detail-grid">
       <section class="normal-detail-block wide">
@@ -593,7 +581,7 @@ function renderNormalDetail(index) {
       </section>
       <section class="normal-detail-block">
         <h5>確認方法</h5>
-        <div class="normal-check-list">${renderChecklistItems(step.methods, "method", workState)}</div>
+        ${renderOrderedItems(step.methods)}
       </section>
       <section class="normal-detail-block">
         <h5>役割</h5>
@@ -601,7 +589,7 @@ function renderNormalDetail(index) {
       </section>
       <section class="normal-detail-block">
         <h5>確認ポイント</h5>
-        <div class="normal-check-list">${renderChecklistItems(step.checkPoints, "checkpoint", workState)}</div>
+        <ul>${renderListItems(step.checkPoints)}</ul>
       </section>
       <section class="normal-detail-block">
         <h5>記録すること</h5>
@@ -680,30 +668,29 @@ function renderTroubleSteps(steps) {
 }
 
 function buildNormalStatusReport(process) {
-  const selectedIndex = appState.selectedNormalStepIndex;
-  const step = selectedIndex === null ? null : process.normalSteps[selectedIndex];
-  if (!step) {
-    return `【通常手順の確認状況】
-・選択した通常手順名：（未選択）
-・確認進捗：0 / 0
-・未確認項目：（通常手順を選択してください）
-・作業メモ・不具合メモ：（未入力）`;
-  }
-
-  const progress = getNormalProgress(step);
-  const workState = getNormalWorkState(step);
-  const uncheckedLines = progress.uncheckedItems.length
-    ? progress.uncheckedItems.map((item) => `  - ${item}`).join("\n")
+  const progress = getProcessNormalProgress(process);
+  const completedLines = progress.completedSteps.length
+    ? progress.completedSteps.map((step) => `  - ${step.number} ${step.title}`).join("\n")
     : "  - なし";
-  const memo = workState.memo.trim() || "（未入力）";
+  const uncheckedLines = progress.uncheckedSteps.length
+    ? progress.uncheckedSteps.map((step) => `  - ${step.number} ${step.title}`).join("\n")
+    : "  - なし";
+  const memoLines = process.normalSteps
+    .map((step) => {
+      const memo = getNormalWorkState(step).memo.trim();
+      return memo ? `  - ${step.number} ${step.title}：${memo}` : "";
+    })
+    .filter(Boolean)
+    .join("\n") || "  - （未入力）";
 
   return `【通常手順の確認状況】
-・選択した通常手順名：${step.number} ${step.title}
-・確認進捗：${progress.checkedCount} / ${progress.totalCount}
-・未確認項目：
+・通常手順の進捗：${progress.completedCount} / ${progress.totalCount}
+・確認済みの通常手順：
+${completedLines}
+・未確認の通常手順：
 ${uncheckedLines}
 ・作業メモ・不具合メモ：
-${memo}`;
+${memoLines}`;
 }
 
 function buildReport(process, trouble) {
@@ -848,18 +835,32 @@ elements.normalStepsContainer.addEventListener("click", (event) => {
   if (button) renderNormalDetail(Number(button.dataset.normalIndex));
 });
 
+function updateNormalCardCompletion(index, isCompleted) {
+  const card = elements.normalStepsContainer.querySelector(`.normal-step-card[data-normal-index="${index}"]`);
+  if (!card) return;
+
+  card.classList.toggle("completed", isCompleted);
+  const existingBadge = card.querySelector(".completed-badge");
+  if (isCompleted && !existingBadge) {
+    card.insertAdjacentHTML("beforeend", `<span class="completed-badge">確認済み</span>`);
+  }
+  if (!isCompleted && existingBadge) {
+    existingBadge.remove();
+  }
+}
+
 elements.normalDetail.addEventListener("change", (event) => {
-  const checkbox = event.target.closest(".normal-check-input");
-  if (!checkbox) return;
+  if (event.target.id !== "normalCompleteCheck") return;
 
   const process = debugData[appState.selectedProcessId];
   const step = process?.normalSteps[appState.selectedNormalStepIndex];
   if (!step) return;
 
   const workState = getNormalWorkState(step);
-  workState.checked[checkbox.dataset.checkKey] = checkbox.checked;
-  checkbox.closest(".normal-check-item")?.classList.toggle("checked", checkbox.checked);
-  updateNormalProgressDisplay(step);
+  workState.completed = event.target.checked;
+  event.target.closest(".normal-complete-check")?.classList.toggle("checked", event.target.checked);
+  updateNormalCardCompletion(appState.selectedNormalStepIndex, event.target.checked);
+  updateNormalProgressDisplay(process);
   refreshReportMemoIfVisible();
 });
 
